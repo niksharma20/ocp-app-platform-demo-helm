@@ -6,6 +6,14 @@ spec:
     namespace: {{ .Values.rhtas.namespace }}
     server: https://kubernetes.default.svc
   project: default
+  # Trusted Artifact Signer 1.5 no longer has spec.rekor.rekorSearchUI: the API
+  # server prunes it, so the Securesign stayed OutOfSync forever (OCP 4.22,
+  # operator 1.5.1). Older operators still read the field from the chart.
+  ignoreDifferences:
+    - group: rhtas.redhat.com
+      kind: Securesign
+      jsonPointers:
+        - /spec/rekor/rekorSearchUI
   source:
     path: rhtas
     repoURL: {{ .Values.gitops.repoURL }}
