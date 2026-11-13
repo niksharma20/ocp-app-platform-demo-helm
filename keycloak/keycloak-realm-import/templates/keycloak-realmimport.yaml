@@ -844,6 +844,10 @@ spec:
           - profile
           - roles
           - email
+          # Admin REST API tokens must carry kc-admin-api (Keycloak "Admin REST
+          # API now enforces an audience check"); the Developer Hub Keycloak
+          # catalog module reads users and groups with this client.
+          - kc-admin-api
         optionalClientScopes:
           - web-origins
           - acr
