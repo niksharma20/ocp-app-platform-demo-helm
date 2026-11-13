@@ -10,6 +10,9 @@ minPodAgeSeconds: 60
 
 probeTimeoutSeconds: 3
 
+# Unready pods are only probed once a container has restarted this often (crash loop).
+minRestartsWhenUnready: 3
+
 excludeNamespaces:
   - kube-system
   - istio-system

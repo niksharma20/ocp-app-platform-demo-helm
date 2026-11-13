@@ -38,6 +38,8 @@ spec:
                   value: {{ .Values.minPodAgeSeconds | quote }}
                 - name: PROBE_TIMEOUT
                   value: {{ .Values.probeTimeoutSeconds | quote }}
+                - name: MIN_RESTARTS
+                  value: {{ .Values.minRestartsWhenUnready | default 3 | quote }}
                 - name: EXCLUDE_NS
                   value: {{ join " " .Values.excludeNamespaces | quote }}
                 - name: HEALER_NS
@@ -104,11 +106,20 @@ spec:
                       AGE=$((NOW - CREATED_TS))
                       [ "$AGE" -lt "$MIN_AGE" ] && continue
 
-                      # Skip pods with unready containers
+                      # Skip pods with unready containers, unless they crash-loop:
+                      # a pod that started before ZTunnel was ready can fail its
+                      # network health checks forever (seen on OCP 4.22: parasol-db,
+                      # "Liveness probe failed: dial tcp ...:5432: i/o timeout",
+                      # 80 restarts) and never becomes Ready, so it was never healed.
                       NOT_READY=$(oc get pod "$POD_NAME" -n "$ns" \
                         -o jsonpath='{range .status.containerStatuses[*]}{.ready}{"\n"}{end}' 2>/dev/null \
                         | grep -c "false" || true)
-                      [ "$NOT_READY" -gt 0 ] && continue
+                      if [ "$NOT_READY" -gt 0 ]; then
+                        RESTARTS=$(oc get pod "$POD_NAME" -n "$ns" \
+                          -o jsonpath='{range .status.containerStatuses[*]}{.restartCount}{"\n"}{end}' 2>/dev/null \
+                          | sort -n | tail -1)
+                        [ "${RESTARTS:-0}" -lt "$MIN_RESTARTS" ] && continue
+                      fi
 
                       CHECKED=$((CHECKED + 1))
 
