@@ -130,6 +130,12 @@ data:
 {{- end }}
 {{- if and $.Values.secrets.litellm.apiUrl $.Values.secrets.litellm.apiKey }}
             - 'vault kv put kv/secrets/litellm/credentials base_url={{ $.Values.secrets.litellm.apiUrl }} api_key={{ $.Values.secrets.litellm.apiKey }}'
+{{- else }}
+            # No LiteLLM endpoint given (a bare cluster has no RHDP LiteMaaS key).
+            # Write placeholders so every ExternalSecret that reads this entry can
+            # sync and Developer Hub, Parasol and Dev Spaces start. Only their AI
+            # features fail, at the moment someone uses them.
+            - 'vault kv put kv/secrets/litellm/credentials base_url=http://litellm.not-configured.invalid/v1 api_key=not-configured'
 {{- end }}
 {{- if $.Values.secrets.tpa.cliClientSecret }}
             - 'vault kv put kv/secrets/tpa/cli-client-secret value={{ $.Values.secrets.tpa.cliClientSecret }}'
