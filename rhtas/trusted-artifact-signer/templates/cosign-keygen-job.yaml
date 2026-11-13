@@ -39,18 +39,38 @@ spec:
                 exit 0
               fi
 
-              # Wait for cli-server to be ready
-              echo "Waiting for cli-server..."
-              until curl -sf http://cli-server.{{ .Values.namespace }}.svc:8080/clients/linux/cosign-amd64.gz -o /dev/null; do
-                echo "cli-server not ready, retrying in 10s..."
-                sleep 10
+              # Get the cosign that belongs to the installed Trusted Artifact Signer:
+              #  - up to 1.3: the in-cluster cli-server in this namespace
+              #  - 1.4 and later: no cli-server; the operator publishes the download
+              #    (developers.redhat.com) in ConsoleCLIDownload rhtas-cosign
+              case "$(uname -m)" in aarch64|arm64) ARCH=arm64 ;; *) ARCH=amd64 ;; esac
+              get_cosign() {
+                rm -rf /tmp/cosign-dl && mkdir -p /tmp/cosign-dl
+                if curl -sf "http://cli-server.{{ .Values.namespace }}.svc:8080/clients/linux/cosign-${ARCH}.gz" -o /tmp/cosign-dl/cosign.gz; then
+                  echo "cosign from the in-cluster cli-server"
+                  gunzip -c /tmp/cosign-dl/cosign.gz > /tmp/cosign
+                  return 0
+                fi
+                URL=$(oc get consoleclidownload rhtas-cosign -o jsonpath='{range .spec.links[*]}{.href}{"\n"}{end}' 2>/dev/null \
+                      | grep -i linux | grep -i "$ARCH" | head -1)
+                [ -n "$URL" ] || return 1
+                curl -sfL "$URL" -o /tmp/cosign-dl/download || return 1
+                echo "cosign from $URL"
+                case "$URL" in
+                  *.tar.gz|*.tgz)
+                    tar -xzf /tmp/cosign-dl/download -C /tmp/cosign-dl || return 1
+                    BIN=$(find /tmp/cosign-dl -type f -name 'cosign*' ! -name download | head -1)
+                    [ -n "$BIN" ] && mv "$BIN" /tmp/cosign ;;
+                  *.gz) gunzip -c /tmp/cosign-dl/download > /tmp/cosign ;;
+                  *) mv /tmp/cosign-dl/download /tmp/cosign ;;
+                esac
+              }
+              until get_cosign && [ -s /tmp/cosign ]; do
+                echo "No cosign download yet (cli-server or ConsoleCLIDownload rhtas-cosign), retrying in 20s..."
+                sleep 20
               done
-              echo "cli-server is ready"
-
-              # Download and install cosign
-              echo "Downloading cosign..."
-              curl -sL http://cli-server.{{ .Values.namespace }}.svc:8080/clients/linux/cosign-amd64.gz | gunzip > /tmp/cosign
               chmod +x /tmp/cosign
+              /tmp/cosign version 2>/dev/null | grep -i gitversion || true
 
               # Generate key pair
               echo "Generating cosign key pair..."

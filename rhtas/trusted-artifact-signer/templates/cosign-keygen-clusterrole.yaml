@@ -9,3 +9,8 @@ rules:
   - apiGroups: [""]
     resources: ["pods", "pods/exec"]
     verbs: ["get", "create"]
+  # Trusted Artifact Signer 1.4+ publishes its CLI downloads here instead of an
+  # in-cluster cli-server.
+  - apiGroups: ["console.openshift.io"]
+    resources: ["consoleclidownloads"]
+    verbs: ["get"]
