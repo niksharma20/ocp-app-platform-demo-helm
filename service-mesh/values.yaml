@@ -1,7 +1,8 @@
 nameOverride: ""
 
 serviceMesh:
-  channel: stable-3.2
+  # Empty: OLM follows the operator's default channel (OCP 4.22 branch).
+  channel: ""
   installPlanApproval: Automatic
   name: servicemeshoperator3
   source: redhat-operators

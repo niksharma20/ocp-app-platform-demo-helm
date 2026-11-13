@@ -4,7 +4,8 @@ fullnameOverride: ""
 namespace: openshift-operators
 
 subscription:
-  channel: stable-3.13
+  # Empty: OLM follows the operator's default channel (OCP 4.22 branch).
+  channel: ""
   installPlanApproval: Automatic
   name: quay-operator
   source: redhat-operators

@@ -5,7 +5,8 @@ namespace: ""
 
 keycloak:
   subscription:
-    channel: stable-v24
+    # Empty: OLM follows the operator's default channel (OCP 4.22 branch).
+    channel: ""
     installPlanApproval: Automatic
     name: rhbk-operator
     source: redhat-operators

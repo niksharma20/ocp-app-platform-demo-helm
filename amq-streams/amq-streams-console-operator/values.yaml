@@ -4,7 +4,8 @@ fullnameOverride: ""
 namespace: openshift-operators
 
 subscription:
-  channel: amq-streams-2.9.x
+  # Empty: OLM follows the operator's default channel (OCP 4.22 branch).
+  channel: ""
   installPlanApproval: Automatic
   name: amq-streams-console
   source: redhat-operators

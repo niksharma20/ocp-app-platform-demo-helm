@@ -5,7 +5,8 @@ namespace: ""
 
 noobaa:
   subscription:
-    channel: stable-4.16
+    # Empty: OLM follows the operator's default channel (OCP 4.22 branch).
+    channel: ""
     installPlanApproval: Automatic
     name: mcg-operator
     source: redhat-operators
