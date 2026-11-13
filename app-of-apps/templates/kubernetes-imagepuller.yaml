@@ -10,4 +10,8 @@ spec:
     path: kubernetes-imagepuller
     repoURL: {{ .Values.gitops.repoURL }}
     targetRevision: {{ .Values.gitops.targetRevision }}
+    helm:
+      valuesObject:
+        subscription:
+          installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
 {{ include "app-of-apps.syncPolicy" . | indent 2 }}

@@ -16,9 +16,11 @@ spec:
         amq-streams-operator:
           subscription:
             source: {{ include "app-of-apps.operatorSource" . }}
+            installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         amq-streams-console-operator:
           subscription:
             source: {{ include "app-of-apps.operatorSource" . }}
+            installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         kafka-broker:
           namespace: {{ .Values.amqStreams.namespace }}
         amq-streams-console:

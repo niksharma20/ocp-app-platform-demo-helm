@@ -15,6 +15,7 @@ spec:
         quay-operator:
           subscription:
             source: {{ include "app-of-apps.operatorSource" . }}
+            installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         quay-registry:
           quay:
             host: {{ .Values.quay.host }}

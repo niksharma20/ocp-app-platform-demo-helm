@@ -5,6 +5,12 @@ gitops:
 argocd:
   namespace: openshift-gitops
 
+# Install plan approval for every operator Subscription the platform creates.
+# Automatic while the platform installs; set to Manual afterwards to freeze the
+# installed operator versions (nothing upgrades until it is set back).
+operators:
+  installPlanApproval: Automatic
+
 # Operator version pinning via custom CatalogSource.
 # When enabled, a snapshot of the Red Hat operator catalog is deployed
 # and all operator subscriptions use it instead of the live catalog.

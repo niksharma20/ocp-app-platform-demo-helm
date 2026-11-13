@@ -17,6 +17,7 @@ spec:
           # fast-1.9 is not available in the snapshot image.
           source: redhat-operators
           sourceNamespace: openshift-marketplace
+          installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         vault:
           namespace: {{ .Values.vault.namespace }}
           name: {{ .Values.vault.name }}

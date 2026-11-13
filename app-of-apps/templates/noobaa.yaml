@@ -25,6 +25,7 @@ spec:
           noobaa:
             subscription:
               source: {{ include "app-of-apps.operatorSource" . }}
+              installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         noobaa:
           nameOverride: {{ .Values.noobaa.name }}
 {{ include "app-of-apps.syncPolicy" . | indent 2 }}

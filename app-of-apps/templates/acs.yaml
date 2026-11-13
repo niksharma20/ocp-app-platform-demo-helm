@@ -16,6 +16,7 @@ spec:
         acs-operator:
           subscription:
             source: {{ include "app-of-apps.operatorSource" . }}
+            installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         acs-instance:
           clusterName: {{ .Values.acs.clusterName }}
           adminPassword: {{ .Values.acs.adminPassword }}

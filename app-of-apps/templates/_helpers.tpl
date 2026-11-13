@@ -47,3 +47,11 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io/foreground
 {{- end }}
+
+{{/*
+Install plan approval for operator Subscriptions: Automatic (default) or Manual.
+*/}}
+{{- define "app-of-apps.installPlanApproval" -}}
+{{- $operators := .Values.operators | default dict -}}
+{{- $operators.installPlanApproval | default "Automatic" -}}
+{{- end -}}

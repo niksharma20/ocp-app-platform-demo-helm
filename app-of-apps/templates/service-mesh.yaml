@@ -19,8 +19,10 @@ spec:
       valuesObject:
         serviceMesh:
           source: {{ include "app-of-apps.operatorSource" . }}
+          installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
         kiali:
           source: {{ include "app-of-apps.operatorSource" . }}
+          installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
   syncPolicy:
     automated:
       prune: true
