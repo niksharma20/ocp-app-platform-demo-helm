@@ -39,34 +39,51 @@ spec:
                 exit 0
               fi
 
-              # Get the cosign that belongs to the installed Trusted Artifact Signer:
-              #  - up to 1.3: the in-cluster cli-server in this namespace
-              #  - 1.4 and later: no cli-server; the operator publishes the download
-              #    (developers.redhat.com) in ConsoleCLIDownload rhtas-cosign
+              # Get a cosign binary, in this order:
+              #  1. the in-cluster cli-server of Trusted Artifact Signer up to 1.3
+              #  2. the download the installed operator publishes in ConsoleCLIDownload
+              #     rhtas-cosign (1.4+: developers.redhat.com). On OCP 4.22 with 1.5.1 that
+              #     link did not serve the archive to an anonymous request, so the result
+              #     is checked for the gzip magic bytes before it is unpacked
+              #  3. the upstream sigstore release on GitHub (cosign is the sigstore
+              #     project RHTAS ships), verified against the release's checksum file
+              # Only the key pair is made with it; signing stays with Tekton Chains.
+              # The loop also re-checks Vault, so keys put there by hand unblock it.
               case "$(uname -m)" in aarch64|arm64) ARCH=arm64 ;; *) ARCH=amd64 ;; esac
+              is_gzip() { [ "$(head -c2 "$1" | od -An -tx1 | tr -d ' \n')" = "1f8b" ]; }
+              keys_exist() {
+                [ -n "$(oc exec vault-0 -n "$VAULT_NAMESPACE" -- vault kv get -field=value kv/secrets/rhtas/cosign-public-key 2>/dev/null)" ]
+              }
               get_cosign() {
-                rm -rf /tmp/cosign-dl && mkdir -p /tmp/cosign-dl
-                if curl -sf "http://cli-server.{{ .Values.namespace }}.svc:8080/clients/linux/cosign-${ARCH}.gz" -o /tmp/cosign-dl/cosign.gz; then
+                rm -rf /tmp/cosign-dl /tmp/cosign && mkdir -p /tmp/cosign-dl
+                if curl -sf "http://cli-server.{{ .Values.namespace }}.svc:8080/clients/linux/cosign-${ARCH}.gz" -o /tmp/cosign-dl/cosign.gz \
+                   && is_gzip /tmp/cosign-dl/cosign.gz; then
                   echo "cosign from the in-cluster cli-server"
-                  gunzip -c /tmp/cosign-dl/cosign.gz > /tmp/cosign
-                  return 0
+                  gunzip -c /tmp/cosign-dl/cosign.gz > /tmp/cosign && return 0
                 fi
                 URL=$(oc get consoleclidownload rhtas-cosign -o jsonpath='{range .spec.links[*]}{.href}{"\n"}{end}' 2>/dev/null \
                       | grep -i linux | grep -i "$ARCH" | head -1)
-                [ -n "$URL" ] || return 1
-                curl -sfL "$URL" -o /tmp/cosign-dl/download || return 1
-                echo "cosign from $URL"
-                case "$URL" in
-                  *.tar.gz|*.tgz)
-                    tar -xzf /tmp/cosign-dl/download -C /tmp/cosign-dl || return 1
-                    BIN=$(find /tmp/cosign-dl -type f -name 'cosign*' ! -name download | head -1)
-                    [ -n "$BIN" ] && mv "$BIN" /tmp/cosign ;;
-                  *.gz) gunzip -c /tmp/cosign-dl/download > /tmp/cosign ;;
-                  *) mv /tmp/cosign-dl/download /tmp/cosign ;;
-                esac
+                if [ -n "$URL" ] && curl -sfL "$URL" -o /tmp/cosign-dl/rh.tar.gz && is_gzip /tmp/cosign-dl/rh.tar.gz \
+                   && tar -xzf /tmp/cosign-dl/rh.tar.gz -C /tmp/cosign-dl; then
+                  BIN=$(find /tmp/cosign-dl -type f -name 'cosign*' ! -name '*.gz' | head -1)
+                  if [ -n "$BIN" ]; then echo "cosign from $URL"; mv "$BIN" /tmp/cosign; return 0; fi
+                fi
+                [ -n "$URL" ] && echo "No cosign archive from $URL (not gzip or not reachable without a login)"
+                GH=https://github.com/sigstore/cosign/releases/latest/download
+                if curl -sfL "$GH/cosign-linux-${ARCH}" -o /tmp/cosign-dl/cosign-linux-${ARCH} \
+                   && curl -sfL "$GH/cosign_checksums.txt" -o /tmp/cosign-dl/cosign_checksums.txt \
+                   && (cd /tmp/cosign-dl && grep " cosign-linux-${ARCH}\$" cosign_checksums.txt | sha256sum -c -); then
+                  echo "cosign from the upstream sigstore release (checksum verified)"
+                  mv /tmp/cosign-dl/cosign-linux-${ARCH} /tmp/cosign && return 0
+                fi
+                return 1
               }
               until get_cosign && [ -s /tmp/cosign ]; do
-                echo "No cosign download yet (cli-server or ConsoleCLIDownload rhtas-cosign), retrying in 20s..."
+                if keys_exist; then
+                  echo "Cosign keys appeared in Vault meanwhile, skipping"
+                  exit 0
+                fi
+                echo "No cosign binary yet (cli-server, ConsoleCLIDownload rhtas-cosign, GitHub), retrying in 20s..."
                 sleep 20
               done
               chmod +x /tmp/cosign
