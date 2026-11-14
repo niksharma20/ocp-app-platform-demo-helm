@@ -15,3 +15,9 @@ spec:
       # ZTunnel's initial reconciliation still get iptables rules set up
       # and are properly handed off for HBONE enrollment.
       istioOwnedCNIConfig: true
+      ambient:
+        # On startup, check and repair the in-pod iptables rules of pods already
+        # in the mesh. Off by default upstream; Red Hat asks for it in ambient
+        # mode because pods otherwise lose mesh connectivity after a node
+        # restart (OSSM-11616).
+        reconcileIptablesOnStartup: true
