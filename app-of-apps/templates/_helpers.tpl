@@ -55,3 +55,24 @@ Install plan approval for operator Subscriptions: Automatic (default) or Manual.
 {{- $operators := .Values.operators | default dict -}}
 {{- $operators.installPlanApproval | default "Automatic" -}}
 {{- end -}}
+
+{{/*
+Exact operator version for one package: channel and startingCSV lines from
+operators.pins (workshop-setup stage 000 writes them from platform/pinned-versions.json),
+or nothing. Not used with the catalog snapshot (catalogSource.enabled), which pins by
+catalog image instead. Call: include "app-of-apps.pin" (dict "root" $ "package" "<name>")
+*/}}
+{{- define "app-of-apps.pin" -}}
+{{- $catalog := .root.Values.catalogSource | default dict -}}
+{{- if not $catalog.enabled -}}
+{{- $operators := .root.Values.operators | default dict -}}
+{{- $pins := $operators.pins | default dict -}}
+{{- $pin := get $pins .package | default dict -}}
+{{- with $pin.channel }}
+channel: {{ . }}
+{{- end }}
+{{- with $pin.startingCSV }}
+startingCSV: {{ . }}
+{{- end }}
+{{- end -}}
+{{- end -}}

@@ -6,6 +6,9 @@ metadata:
 spec:
   channel: {{ .Values.kiali.channel }}
   installPlanApproval: {{ .Values.kiali.installPlanApproval }}
+  {{- with .Values.kiali.startingCSV }}
+  startingCSV: {{ . }}
+  {{- end }}
   name: {{ .Values.kiali.name }}
   source: {{ .Values.kiali.source }}
   sourceNamespace: {{ .Values.kiali.sourceNamespace }}

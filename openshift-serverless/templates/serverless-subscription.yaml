@@ -7,6 +7,9 @@ metadata:
 spec:
   channel: {{ .Values.serverless.channel }}
   installPlanApproval: {{ .Values.serverless.installPlanApproval }}
+  {{- with .Values.serverless.startingCSV }}
+  startingCSV: {{ . }}
+  {{- end }}
   name: {{ .Values.serverless.name }}
   source: {{ .Values.serverless.source }}
   sourceNamespace: {{ .Values.serverless.sourceNamespace }}

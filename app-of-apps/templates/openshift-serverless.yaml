@@ -15,7 +15,9 @@ spec:
         serverless:
           source: {{ include "app-of-apps.operatorSource" . }}
           installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+          {{- include "app-of-apps.pin" (dict "root" $ "package" "serverless-operator") | trim | nindent 10 }}
         serverlessLogic:
           source: {{ include "app-of-apps.operatorSource" . }}
           installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+          {{- include "app-of-apps.pin" (dict "root" $ "package" "logic-operator") | trim | nindent 10 }}
 {{ include "app-of-apps.syncPolicy" . | indent 2 }}

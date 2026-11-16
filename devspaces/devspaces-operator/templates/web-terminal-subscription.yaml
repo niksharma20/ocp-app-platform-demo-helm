@@ -10,6 +10,9 @@ metadata:
 spec:
   channel: {{ .Values.webTerminal.subscription.channel }}
   installPlanApproval: {{ .Values.webTerminal.subscription.installPlanApproval }}
+  {{- with .Values.webTerminal.subscription.startingCSV }}
+  startingCSV: {{ . }}
+  {{- end }}
   name: {{ .Values.webTerminal.subscription.name }}
   source: {{ .Values.webTerminal.subscription.source }}
   sourceNamespace: {{ .Values.webTerminal.subscription.sourceNamespace }}

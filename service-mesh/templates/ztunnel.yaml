@@ -8,4 +8,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   namespace: {{ .Values.ztunnel.namespace }}
+  {{- with .Values.istio.version }}
+  version: {{ . }}
+  {{- end }}
   profile: ambient

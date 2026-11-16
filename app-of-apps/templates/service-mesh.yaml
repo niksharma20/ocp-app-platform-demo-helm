@@ -20,9 +20,15 @@ spec:
         serviceMesh:
           source: {{ include "app-of-apps.operatorSource" . }}
           installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+          {{- include "app-of-apps.pin" (dict "root" $ "package" "servicemeshoperator3") | trim | nindent 10 }}
         kiali:
           source: {{ include "app-of-apps.operatorSource" . }}
           installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+          {{- include "app-of-apps.pin" (dict "root" $ "package" "kiali-ossm") | trim | nindent 10 }}
+        {{- with ($.Values.operators | default dict).istioVersion }}
+        istio:
+          version: {{ . }}
+        {{- end }}
   syncPolicy:
     automated:
       prune: true

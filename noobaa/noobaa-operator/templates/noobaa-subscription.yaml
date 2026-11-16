@@ -9,6 +9,9 @@ metadata:
 spec:
   channel: {{ .Values.noobaa.subscription.channel }}
   installPlanApproval: {{ .Values.noobaa.subscription.installPlanApproval }}
+  {{- with .Values.noobaa.subscription.startingCSV }}
+  startingCSV: {{ . }}
+  {{- end }}
   name: {{ .Values.noobaa.subscription.name }}
   source: {{ .Values.noobaa.subscription.source }}
   sourceNamespace: {{ .Values.noobaa.subscription.sourceNamespace }}

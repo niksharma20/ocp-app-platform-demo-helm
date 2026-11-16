@@ -17,6 +17,9 @@ kiali:
 
 istio:
   namespace: istio-system
+  # Istio version for Istio, IstioCNI and ZTunnel (for example v1.28.10). Empty: the
+  # operator's default at creation time. It must be one the installed operator supports.
+  version: ""
   discoverySelector:
     matchLabels:
       istio.io/dataplane-mode: ambient

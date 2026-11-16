@@ -10,6 +10,12 @@ argocd:
 # installed operator versions (nothing upgrades until it is set back).
 operators:
   installPlanApproval: Automatic
+  # Exact versions per OLM package: {<package>: {channel: <channel>, startingCSV: <csv>}}.
+  # Empty: every operator follows its default channel. Use with installPlanApproval: Manual
+  # and approve only the install plans of these CSVs (workshop-setup: stages/000-platform/pins.py).
+  pins: {}
+  # Istio version for the mesh (must match the pinned Service Mesh operator), e.g. v1.28.10.
+  istioVersion: ""
 
 # Operator version pinning via custom CatalogSource.
 # When enabled, a snapshot of the Red Hat operator catalog is deployed

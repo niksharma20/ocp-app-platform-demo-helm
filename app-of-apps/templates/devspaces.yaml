@@ -18,6 +18,7 @@ spec:
             subscription:
               source: {{ include "app-of-apps.operatorSource" . }}
               installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+              {{- include "app-of-apps.pin" (dict "root" $ "package" "devspaces") | trim | nindent 14 }}
               {{- if .Values.catalogSource.enabled }}
               startingCSV: ""
               {{- end }}
@@ -25,6 +26,7 @@ spec:
             subscription:
               source: {{ include "app-of-apps.operatorSource" . }}
               installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+              {{- include "app-of-apps.pin" (dict "root" $ "package" "web-terminal") | trim | nindent 14 }}
         devspaces-instance:
           gitlab:
             host: {{ .Values.gitlab.host }}

@@ -6,6 +6,9 @@ metadata:
 spec:
   channel: {{ .Values.serviceMesh.channel }}
   installPlanApproval: {{ .Values.serviceMesh.installPlanApproval }}
+  {{- with .Values.serviceMesh.startingCSV }}
+  startingCSV: {{ . }}
+  {{- end }}
   name: {{ .Values.serviceMesh.name }}
   source: {{ .Values.serviceMesh.source }}
   sourceNamespace: {{ .Values.serviceMesh.sourceNamespace }}

@@ -18,6 +18,7 @@ spec:
           source: redhat-operators
           sourceNamespace: openshift-marketplace
           installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+          {{- include "app-of-apps.pin" (dict "root" $ "package" "rhdh") | trim | nindent 10 }}
         vault:
           namespace: {{ .Values.vault.namespace }}
           name: {{ .Values.vault.name }}

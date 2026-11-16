@@ -17,10 +17,12 @@ spec:
           subscription:
             source: {{ include "app-of-apps.operatorSource" . }}
             installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+            {{- include "app-of-apps.pin" (dict "root" $ "package" "amq-streams") | trim | nindent 12 }}
         amq-streams-console-operator:
           subscription:
             source: {{ include "app-of-apps.operatorSource" . }}
             installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+            {{- include "app-of-apps.pin" (dict "root" $ "package" "amq-streams-console") | trim | nindent 12 }}
         kafka-broker:
           namespace: {{ .Values.amqStreams.namespace }}
         amq-streams-console:

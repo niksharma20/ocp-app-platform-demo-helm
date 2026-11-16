@@ -9,6 +9,9 @@ metadata:
 spec:
   channel: {{ .Values.keycloak.subscription.channel }}
   installPlanApproval: {{ .Values.keycloak.subscription.installPlanApproval }}
+  {{- with .Values.keycloak.subscription.startingCSV }}
+  startingCSV: {{ . }}
+  {{- end }}
   name: {{ .Values.keycloak.subscription.name }}
   source: {{ .Values.keycloak.subscription.source }}
   sourceNamespace: {{ .Values.keycloak.subscription.sourceNamespace }}

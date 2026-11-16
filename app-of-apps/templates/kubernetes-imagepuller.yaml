@@ -14,4 +14,5 @@ spec:
       valuesObject:
         subscription:
           installPlanApproval: {{ include "app-of-apps.installPlanApproval" . }}
+          {{- include "app-of-apps.pin" (dict "root" $ "package" "kubernetes-imagepuller-operator") | trim | nindent 10 }}
 {{ include "app-of-apps.syncPolicy" . | indent 2 }}
